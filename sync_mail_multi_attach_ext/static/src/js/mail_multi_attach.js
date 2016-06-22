@@ -61,23 +61,17 @@ openerp.sync_mail_multi_attach_ext = function (session){
         
         on_attachment_changed: function (event) {
             event.preventDefault();
-        event.stopPropagation();
             event.stopPropagation();
             var self = this;
+            var form = $(this);
             var callback = $("input[name=callback]").val();
             var model = $("input[name=model]").val();
             var id = $("input[name=id]").val();
             var $target = $(event.target);
-            if ($target.val() !== '') {                
-
-                // submit file
+            var retmsg = '';
+            if ($target.val() !== '') { 
+                var cont =0;
                 _.each($target[0].files, function(file){
-                
-                //When we Submits the Page name in ufile field shall be added. 
-                //So, initially adding other files whose name not in ufile. 
-                //By Submit file in ufile fieled shall be added.
-                if(file.name!=$("input[name=ufile]").val())
-                {
                     var querydata = new FormData();
                     querydata.append('callback', callback);
                     querydata.append('ufile',file);
@@ -89,14 +83,20 @@ openerp.sync_mail_multi_attach_ext = function (session){
                         data: querydata,
                         cache: false,
                         processData: false,  
-                        contentType: false,                        
+                        contentType: false,   
+                        success: function(msg) {
+                        
+                        cont+=1;
+                        if(cont==$target[0].files.length)
+                        {                                         
+			  var iframe = $('iframe').first();          
+			  if ($(iframe).attr('id').indexOf("oe_fileupload") >= 0){
+			      $(iframe).contents().find('body').html(msg);
+			  }
+                        }
+                    }                
                     });
-                 }   
-
-                });               
-
-                this.$('form.oe_form_binary_form').submit();
-                
+                });                 
             }
         },
         });
